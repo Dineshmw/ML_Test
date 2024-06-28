@@ -2,12 +2,13 @@ import streamlit as st
 import pandas as pd
 from home import add_logo
 
-
 st.set_page_config(
     layout="wide",
     page_title ="Songs hit Predictions Application"
     )
+ 
 st.title("About Dataset")
+
 add_logo()
 st.write("This is a dataset of Spotify tracks over a range of 125 different genres. Each track has some audio features associated with it. The data is in CSV format which is tabular and can be loaded quickly.")
 

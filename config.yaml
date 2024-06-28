@@ -1,0 +1,17 @@
+credentials:
+  usernames:
+    admin:
+      email: admin@gmail.com
+      name: admin
+      password: $2b$12$4/KVbuEnkF3Wn5eRPQw9Y.mJPiIImbvYw6CQyMDFKrGxXP66uk866
+    user:
+      email: user@gmail.com
+      name: user
+      password: $2b$12$GfCfXmebwZSOXIPAZpUNZOgabVs96P50z.hKsdXVhECLZxeV0D7iC
+cookie:
+  expiry_days: 30
+  key: random_signature_key
+  name: random_cookie_name
+preauthorized:
+  emails:
+    - melsby@gmail.com
