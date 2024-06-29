@@ -63,7 +63,19 @@ if authentication_status:
 
     st.dataframe(data, use_container_width=True)
 
-elif authentication_status == False:
-    st.error('Username/password is incorrect')
-elif authentication_status == None:
-    st.warning('Please enter your username and password')
+else:
+    # Hide the sidebar completely on the login page
+    hide_sidebar_style = """
+        <style>
+            [data-testid="stSidebarNav"], [data-testid="collapsedControl"], .css-1lcbmhc, .css-qri22k {
+                display: none;
+            }
+        </style>
+    """
+    st.markdown(hide_sidebar_style, unsafe_allow_html=True)
+
+
+    if authentication_status == False:
+        st.error('Username/password is incorrect')
+    elif authentication_status == None:
+        st.warning('Please enter your username and password')
