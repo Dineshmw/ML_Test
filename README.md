@@ -1,9 +1,10 @@
 # ML_Song_Hit_Prediction
+
 Song Hit Prediction ML Project
 
 ### Project Setup
 
-1. Clone / Downlaod the Repository in to  the local Project directory.
+1. Clone / Downlaod the Repository in to the local Project directory.
 
 2. Install Miniconda (Windows)
 
@@ -28,9 +29,9 @@ conda activate hitsong_env
 ```
 jupyter notebook
 ```
+
 8. Open the Webapp
 
 ```
-streamlit run home.py
+streamlit run Dashboard.py
 ```
-

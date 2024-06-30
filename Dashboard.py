@@ -6,9 +6,11 @@ import streamlit_authenticator as stauth
 from streamlit_authenticator import Authenticate
 from streamlit_authenticator.utilities.hasher import Hasher
 
+
 st.set_page_config(
     layout="wide",
-    page_title ="Songs hit Predictions Application"
+    page_title ="AudioHitAnalyzer",
+    page_icon="🎧"
     )
 
 def hash_passwords(passwords):
@@ -32,16 +34,16 @@ authenticator = Authenticate(
 name, authentication_status, username = authenticator.login('main')
 
 if authentication_status:
-    st.subheader(f'Welcome {name}!')
+    st.subheader('Welcome! :wave:')
     authenticator.logout('Logout', 'sidebar')
 
-    def add_logo():
+    def appName():
         st.markdown("""
             <style>
                 [data-testid="stSidebarNav"]::before {
-                    content: "Song Hit Prediction";
+                    content: "🎧 AudioHitAnalyzer";
                     margin-left: 25px;
-                    font-size: 25px;
+                    font-size: 22px;
                     position: relative;
                     top: 50px;
                     font-weight: 600;
@@ -49,14 +51,35 @@ if authentication_status:
             </style>
         """, unsafe_allow_html=True)
 
+        
+
     data = pd.read_csv("dataset/dataset.csv")
     bar_chart_data = data['key'].value_counts().reset_index()
     bar_chart_data = bar_chart_data.sort_values(by = 'count', ascending = False)
     scatter_chart_data = data[['tempo', 'danceability', 'time_signature']].head(100)
 
-    st.title("Dashboard")
+    custom_html = """
+    <div style="position: relative; padding: 15px; border: 1px solid #4CAF50; background-color: #e7f3ea; color: #4CAF50; border-radius: 5px; display: flex; align-items: center;">
+        <div style="flex: 1;">
+            <span style="font-size: 18px; font-weight: bold;">✅ AudioHitAnalyzer</span><br>
+            AudioHitAnalyzer predicts the popularity of songs based on user-input details such as tempo, danceability, and time signature. The app analyzes these factors to provide insights into the potential popularity of a song, helping users understand its projected impact in the music landscape.
+        </div>
+        
+    </div>
+    """
+
+    st.markdown(custom_html, unsafe_allow_html=True)
+
+    st.write("")
+
+    if st.button("Get Start!", type="primary"):
+        st.switch_page("pages/Predictions.py")
+
+    st.title("⚙ Dashboard")
+
+    st.divider()
     
-    add_logo()
+    appName()
     col1, col2 = st.columns([2, 1])
     col1.bar_chart(bar_chart_data)
     col2.scatter_chart(scatter_chart_data)
@@ -64,13 +87,16 @@ if authentication_status:
     st.dataframe(data, use_container_width=True)
 
 else:
-    # Hide the sidebar completely on the login page
     hide_sidebar_style = """
-        <style>
-            [data-testid="stSidebarNav"], [data-testid="collapsedControl"], .css-1lcbmhc, .css-qri22k {
-                display: none;
-            }
-        </style>
+    <style>
+        .eczjsme11 {
+            display: none !important;
+        }
+        .main{
+            margin-right: 15rem;
+            margin-left: 15rem;
+        }
+    </style>
     """
     st.markdown(hide_sidebar_style, unsafe_allow_html=True)
 

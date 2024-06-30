@@ -1,20 +1,36 @@
 import streamlit as st
 from pycaret.classification import *
 import pandas as pd
-from home import add_logo
+from streamlit_authenticator import Authenticate
+from streamlit_authenticator.utilities.hasher import Hasher
+import yaml
+from yaml.loader import SafeLoader
 
-
-# session variables
-# st.session_state.prediction_state = "";
 st.session_state.fd_submit = False
 st.session_state.submit = False
 
 st.set_page_config(
     layout="wide",
-    page_title ="Songs hit Predictions Application"
+    page_title ="Predictions - AudioHitAnalyzer",
+    page_icon="🎧"
     )
-st.title("Predictions")
-add_logo()
+
+def appName():
+    st.markdown("""
+        <style>
+            [data-testid="stSidebarNav"]::before {
+                content: "🎧 AudioHitAnalyzer";
+                margin-left: 25px;
+                font-size: 22px;
+                position: relative;
+                top: 50px;
+                font-weight: 600;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+st.title("🎶 Predictions")
+appName()
 notes_dict = {'A': 9, 'A#/Bb': 10, 'B': 11, 'C': 0, 'C#/Db': 1, 'D': 2, 'D#/Eb': 3, 'E': 4, 'F': 5, 'F#/Gb': 6, 'G': 7, 'G#/Ab': 8}
 
 time_signatures_dict = {"3/4": 3,  "4/4": 4, "5/4": 5, "6/4": 6, "7/4": 7}
@@ -65,63 +81,50 @@ with st.form("my_form"):
     col1, col2 = st.columns([1, 1])
     key = col1.selectbox(
     "Key",
-    ('A', 'A#/Bb', 'B', 'C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab'))
-    danceability = col2.slider("Danceability", 0.00,1.00,0.00)
+    ('A', 'A#/Bb', 'B', 'C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab'),  help="Integers map to pitches using standard Pitch Class notation. For example, E.g. 0 = C, 1 = C♯/D♭, 2 = D, and so on. If no key was detected, the value is -1.")
+    danceability = col2.slider("Danceability", 0.00,1.00,0.00, help="Indicates how suitable a track is for dancing, based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is the least danceable, and 1.0 is the most danceable.")
 
-    explicit = st.toggle("Explicit")
-
-    col1, col2 = st.columns([1, 1])
-    duration = col1.number_input("Duration (Seconds)")
-    enargy = col2.slider("Enargy", 0.00,1.00,0.00)
+    explicit = st.toggle("Explicit", help="Explicit")
 
     col1, col2 = st.columns([1, 1])
-    mode = col1.selectbox(
-    "mode",
-    ('Minor', 'Major'))
-    loudness = col2.slider("Loudness", -50.00,50.00,0.00)
+    duration = col1.number_input("Duration (Seconds)", help="The track length in milliseconds.")
+    enargy = col2.slider("Energy", 0.00, 1.00, 0.00, help="Measures the intensity and activity of a track. Energetic tracks feel fast, loud, and noisy. This is measured from 0.0 to 1.0.")
 
     col1, col2 = st.columns([1, 1])
-    speechiness = col1.slider("Speechiness", 0.00,1.00,0.00)
-    acousticness = col2.slider("Acousticness", 0.00,1.00,0.00)
+    mode = col1.selectbox("Mode", ('Minor', 'Major'), help="Indicates the modality (major or minor) of a track. Major is represented by 1, and minor by 0.")
+    loudness = col2.slider("Loudness", -50.00, 50.00, 0.00, help="The overall loudness of a track in decibels (dB).")
 
     col1, col2 = st.columns([1, 1])
-    instrumentalness = col1.slider("Instrumentalness", 0.00,1.00,0.00)
-    liveness = col2.slider("Liveness", 0.00,1.00,0.00)
+    speechiness = col1.slider("Speechiness", 0.00, 1.00, 0.00, help="Measures the presence of spoken words in a track. A value closer to 1.0 indicates more speech-like content. Values above 0.66 likely represent tracks made entirely of spoken words. Values between 0.33 and 0.66 may contain both music and speech, either in sections or layered, such as in rap music. Values below 0.33 likely represent music and other non-speech-like tracks.")
+    acousticness = col2.slider("Acousticness", 0.00, 1.00, 0.00, help="A confidence measure from 0.0 to 1.0 indicates whether the track is acoustic. A value of 1.0 represents high confidence that the track is acoustic.")
 
     col1, col2 = st.columns([1, 1])
-    valence = col1.slider("Valence", 0.00,1.00,0.00)
-    tempo = col2.slider("Tempo", 0.00,250.00,0.00)
+    instrumentalness = col1.slider("Instrumentalness", 0.00, 1.00, 0.00, help="Predicts whether a track contains no vocals. 'Ooh' and 'aah' sounds are considered instrumental. Rap or spoken word tracks are classified as 'vocal.' The closer the instrumentalness value is to 1.0, the greater the likelihood that the track contains no vocal content.")
+    liveness = col2.slider("Liveness", 0.00, 1.00, 0.00, help="Detects the presence of an audience in the recording. Higher liveness values indicate an increased probability that the track was performed live. A value above 0.8 strongly suggests the track is live.")
 
     col1, col2 = st.columns([1, 1])
-    time_signature = col1.selectbox(
-    "Time signature",
-    ('3/4', '4/4', '5/4', '6/4', '7/4'))
-    track_genre = col2.selectbox(
-    "Track genre",
-    ('acoustic', 'afrobeat', 'alt-rock', 'alternative', 'ambient',
-       'anime', 'black-metal', 'bluegrass', 'blues', 'brazil',
-       'breakbeat', 'british', 'cantopop', 'chicago-house', 'children',
-       'chill', 'classical', 'club', 'comedy', 'country', 'dance',
-       'dancehall', 'death-metal', 'deep-house', 'detroit-techno',
-       'disco', 'disney', 'drum-and-bass', 'dub', 'dubstep', 'edm',
-       'electro', 'electronic', 'emo', 'folk', 'forro', 'french', 'funk',
-       'garage', 'german', 'gospel', 'goth', 'grindcore', 'groove',
-       'grunge', 'guitar', 'happy', 'hard-rock', 'hardcore', 'hardstyle',
-       'heavy-metal', 'hip-hop', 'honky-tonk', 'house', 'idm', 'indian',
-       'indie-pop', 'indie', 'industrial', 'iranian', 'j-dance', 'j-idol',
-       'j-pop', 'j-rock', 'jazz', 'k-pop', 'kids', 'latin', 'latino',
-       'malay', 'mandopop', 'metal', 'metalcore', 'minimal-techno', 'mpb',
-       'new-age', 'opera', 'pagode', 'party', 'piano', 'pop-film', 'pop',
-       'power-pop', 'progressive-house', 'psych-rock', 'punk-rock',
-       'punk', 'r-n-b', 'reggae', 'reggaeton', 'rock-n-roll', 'rock',
-       'rockabilly', 'romance', 'sad', 'salsa', 'samba', 'sertanejo',
-       'show-tunes', 'singer-songwriter', 'ska', 'sleep', 'songwriter',
-       'soul', 'spanish', 'study', 'swedish', 'synth-pop', 'tango',
-       'techno', 'trance', 'trip-hop', 'turkish', 'world-music'))
+    valence = col1.slider("Valence", 0.00, 1.00, 0.00, help="A measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound more positive (e.g., happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g., sad, depressed, angry).")
+    tempo = col2.slider("Tempo", 0.00, 250.00, 0.00, help="The overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo refers to the speed or pace of a piece and is derived from the average beat duration.")
+
+    col1, col2 = st.columns([1, 1])
+    time_signature = col1.selectbox("Time Signature", ('3/4', '4/4', '5/4', '6/4', '7/4'), help="An estimated time signature of the track. The time signature (meter) specifies how many beats are in each bar (or measure). The time signature ranges from 3 to 7, indicating time signatures of 3/4 to 7/4.")
+    track_genre = col2.selectbox("Track Genre", (
+        'acoustic', 'afrobeat', 'alt-rock', 'alternative', 'ambient', 'anime', 'black-metal', 'bluegrass', 'blues', 'brazil',
+        'breakbeat', 'british', 'cantopop', 'chicago-house', 'children', 'chill', 'classical', 'club', 'comedy', 'country', 
+        'dance', 'dancehall', 'death-metal', 'deep-house', 'detroit-techno', 'disco', 'disney', 'drum-and-bass', 'dub', 
+        'dubstep', 'edm', 'electro', 'electronic', 'emo', 'folk', 'forro', 'french', 'funk', 'garage', 'german', 'gospel', 
+        'goth', 'grindcore', 'groove', 'grunge', 'guitar', 'happy', 'hard-rock', 'hardcore', 'hardstyle', 'heavy-metal', 
+        'hip-hop', 'honky-tonk', 'house', 'idm', 'indian', 'indie-pop', 'indie', 'industrial', 'iranian', 'j-dance', 
+        'j-idol', 'j-pop', 'j-rock', 'jazz', 'k-pop', 'kids', 'latin', 'latino', 'malay', 'mandopop', 'metal', 'metalcore', 
+        'minimal-techno', 'mpb', 'new-age', 'opera', 'pagode', 'party', 'piano', 'pop-film', 'pop', 'power-pop', 
+        'progressive-house', 'psych-rock', 'punk-rock', 'punk', 'r-n-b', 'reggae', 'reggaeton', 'rock-n-roll', 'rock', 
+        'rockabilly', 'romance', 'sad', 'salsa', 'samba', 'sertanejo', 'show-tunes', 'singer-songwriter', 'ska', 'sleep', 
+        'songwriter', 'soul', 'spanish', 'study', 'swedish', 'synth-pop', 'tango', 'techno', 'trance', 'trip-hop', 
+        'turkish', 'world-music'), help="The genre to which the track belongs.")
 
 
     submitted = st.form_submit_button("Submit")
-   
+
 if submitted:
     st.session_state.submit = True
 
@@ -190,7 +193,7 @@ if submitted:
     st.session_state.prediction_state = prediction_value;
     st.subheader(f"The Predicted Popularity : {st.session_state.prediction_state} %")
 
-     
+    
 
 st.title("Feedback")
 with st.form("feedback_form"):
@@ -233,4 +236,3 @@ if st.session_state.submit:
         fd_df.to_csv('dataset/feedback.csv',mode='a', header=False, index=False)
 
             
-       
