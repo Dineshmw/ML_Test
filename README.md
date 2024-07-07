@@ -33,5 +33,12 @@ jupyter notebook
 8. Open the Webapp
 
 ```
+streamlit run Dashboard.py --client.showErr
+orDetails=false
+```
+
+or (For development)
+
+```
 streamlit run Dashboard.py
 ```

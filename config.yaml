@@ -1,17 +1,27 @@
-credentials:
-  usernames:
-    admin:
-      email: admin@gmail.com
-      name: admin
-      password: $2b$12$4/KVbuEnkF3Wn5eRPQw9Y.mJPiIImbvYw6CQyMDFKrGxXP66uk866
-    user:
-      email: user@gmail.com
-      name: user
-      password: $2b$12$GfCfXmebwZSOXIPAZpUNZOgabVs96P50z.hKsdXVhECLZxeV0D7iC
 cookie:
   expiry_days: 1
   key: random_signature_key
   name: random_cookie_name
+credentials:
+  usernames:
+    admin:
+      email: admin@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: admin
+      password: $2b$12$4/KVbuEnkF3Wn5eRPQw9Y.mJPiIImbvYw6CQyMDFKrGxXP66uk866
+    ashan:
+      email: ashan@gmail.com
+      name: ashan
+      password: $2b$12$mDPmakYyMfqArCkYIZEFle/sCYnNiVM.m9N09zi3qnq9ayn8qZWEa
 preauthorized:
   emails:
-    - melsby@gmail.com
+  - melsby@gmail.com
+  - ashan@gmail.com
+  - ashan@gmail.com
+  - ashan@gmail.com
+  - ashan1@gmail.com
+  - ashan2@gmail.com
+  - ashan3@gmail.com
+  - ashan4@gmail.com
+  - ashan@gmail.com
